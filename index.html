@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>진주교대 면접 연습 – 50문항 AI 코치</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Noto Sans KR',sans-serif;background:#f4f7f5;color:#2f3e36}
+.jua{font-family:'Jua',sans-serif}
+.card{background:#ffffff;border:2px solid #e1ede6;border-radius:1.25rem;box-shadow:0 4px 20px -2px rgba(47,62,54,0.04)}
+.pulse{animation:p 1.5s infinite}
+@keyframes p{0%{box-shadow:0 0 0 0 rgba(76,138,103,.7)}100%{box-shadow:0 0 0 16px rgba(76,138,103,0)}}
+</style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-[#f8faf8] via-[#f1f5f3] to-[#ebf2ee]">
+<header class="bg-white/90 backdrop-blur-md border-b-2 border-emerald-100 sticky top-0 z-30 shadow-xs">
+  <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+    <h1 class="jua text-xl text-emerald-800 tracking-wide flex items-center gap-2.5">
+      <!-- 진주교대 상징 사슴 캐릭터(큐티) SVG 일러스트 -->
+      <span class="inline-block transform hover:scale-110 transition-transform bg-emerald-100 p-1.5 rounded-full shadow-xs">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" class="w-6 h-6">
+          <!-- 머리 배경 -->
+          <circle cx="18" cy="20" r="10" fill="#f97316"/>
+          <!-- 귀 -->
+          <ellipse cx="11" cy="14" rx="3" ry="5" fill="#ea580c" transform="rotate(-20 11 14)"/>
+          <ellipse cx="25" cy="14" rx="3" ry="5" fill="#ea580c" transform="rotate(20 25 14)"/>
+          <!-- 뿔 (CUE 형상화) -->
+          <path d="M13 11 C11 6 8 5 6 7 C5 8 7 10 9 10" stroke="#78350f" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M23 11 C25 6 28 5 30 7 C31 8 29 10 27 10" stroke="#78350f" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <!-- 얼굴 하단 콧등 -->
+          <ellipse cx="18" cy="22" rx="4" ry="3" fill="#ffedd5"/>
+          <!-- 눈 -->
+          <circle cx="15" cy="19" r="1.5" fill="#292524"/>
+          <circle cx="21" cy="19" r="1.5" fill="#292524"/>
+          <!-- 코 -->
+          <circle cx="18" cy="21" r="1" fill="#451a03"/>
+          <!-- 볼터치 -->
+          <circle cx="13" cy="22" r="2" fill="#fda4af" opacity="0.7"/>
+          <circle cx="23" cy="22" r="2" fill="#fda4af" opacity="0.7"/>
+        </svg>
+      </span>
+      진주교대 가자!
+    </h1>
+    <button id="keyBtn" class="text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl px-3.5 py-2 transition-all flex items-center gap-1"><span>🔑</span> API 키 설정</button>
+  </div>
+  <div id="keyrow" class="border-t border-emerald-100 bg-emerald-50/90 px-4 py-3 flex gap-2 max-w-6xl mx-auto backdrop-blur-sm">
+    <input id="keyIn" type="password" placeholder="Gemini API 키를 입력하세요 (이 기기 브라우저에 안전하게 저장됩니다)" class="flex-1 text-xs p-2.5 rounded-lg border border-emerald-200 bg-white focus:outline-emerald-400">
+    <button id="keySave" class="text-xs font-bold bg-emerald-600 text-white rounded-lg px-4 hover:bg-emerald-700 transition-all shadow-sm">저장</button>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-12 gap-5">
+  <aside class="lg:col-span-4 card p-4 flex flex-col lg:h-[calc(100vh-110px)] lg:sticky lg:top-20">
+    <div class="flex gap-1 text-xs font-bold mb-3" id="filters">
+      <button data-f="-1" class="f flex-1 py-2 rounded-xl transition-all">전체 목록</button>
+      <button data-f="0" class="f flex-1 py-2 rounded-xl transition-all">💚 인성·일반</button>
+      <button data-f="1" class="f flex-1 py-2 rounded-xl transition-all">📘 교육시사</button>
+      <button data-f="2" class="f flex-1 py-2 rounded-xl transition-all">📑 생기부</button>
+    </div>
+    <div class="flex items-center justify-between text-xs mb-3 px-1">
+      <span class="text-slate-600">완료 <b id="done" class="text-emerald-700">0</b> / <span id="total">50</span></span>
+      <div class="w-28 h-2.5 bg-emerald-100 rounded-full overflow-hidden"><div id="bar" class="h-full bg-emerald-600 w-0 transition-all duration-300"></div></div>
+      <button id="rand" class="font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl px-2.5 py-1.5 transition-all flex items-center gap-1"><span>🔀</span> 랜덤</button>
+    </div>
+    <div id="list" class="flex-1 overflow-y-auto space-y-2.5 pr-1 max-h-[50vh] lg:max-h-none"></div>
+    <div class="pt-3 mt-3 border-t border-emerald-100 space-y-2">
+      <textarea id="newQ" rows="2" placeholder="✏️ 나만의 면접 질문 추가하기" class="w-full text-xs p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/30 focus:outline-emerald-400"></textarea>
+      <button id="addQ" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-1"><span>➕</span> 질문 추가하기</button>
+    </div>
+  </aside>
+
+  <section class="lg:col-span-8 space-y-5">
+    <div class="card p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs font-bold">
+      <div id="steps" class="flex items-center gap-1.5 overflow-x-auto py-1"></div>
+      <button id="reset" class="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-3.5 py-2 hover:bg-emerald-100 transition-all flex items-center gap-1"><span>🔄</span> 처음부터 다시</button>
+    </div>
+
+    <div class="card p-6 relative overflow-hidden">
+      <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-100/40 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="flex justify-between text-xs font-bold mb-3">
+        <span id="cat" class="bg-emerald-100 text-emerald-900 rounded-xl px-3 py-1.5 shadow-xs flex items-center gap-1"></span>
+        <span id="qnum" class="text-emerald-700 font-extrabold"></span>
+      </div>
+      <h2 id="qtext" class="text-xl font-bold leading-relaxed text-slate-800"></h2>
+      <details class="mt-4 bg-emerald-50/60 border border-emerald-200/70 rounded-2xl p-4 text-sm transition-all">
+        <summary class="cursor-pointer font-bold text-emerald-900 flex items-center gap-1.5"><span>💡</span> 답변 팁 가이드 보기</summary>
+        <p id="tip" class="mt-2.5 text-slate-600 leading-relaxed"></p>
+      </details>
+      <div class="mt-5 flex justify-between items-center pt-3 border-t border-emerald-100/60">
+        <button id="prev" class="text-xs font-bold border border-emerald-200 bg-white text-slate-700 rounded-xl px-4 py-2.5 hover:bg-emerald-50 transition-all flex items-center gap-1"><span>◀</span> 이전 질문</button>
+        <button id="next" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4.5 py-2.5 transition-all shadow-sm flex items-center gap-1">다음 질문 <span>▶</span></button>
+      </div>
+    </div>
+
+    <div class="card p-6 space-y-4 relative" id="answerBox">
+      <div class="flex justify-between items-center">
+        <h3 id="rtitle" class="font-bold text-slate-800 flex items-center gap-2"><span>🎙️</span> 답변 녹음하기</h3>
+        <span id="timer" class="font-mono text-sm font-bold bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-3.5 py-1.5">00:00</span>
+      </div>
+      <p class="text-xs text-slate-500 leading-relaxed">💬 교대 면접 답변은 1분 안팎이 가장 좋습니다. <b>[결론 먼저] → [구체적 경험 하나] → [교사로서의 다짐]</b> 순서로 편안하고 자신 있게 말씀해보세요.</p>
+      
+      <div class="bg-gradient-to-r from-[#22332a] to-[#18261e] rounded-2xl py-6 px-4 flex items-center justify-center gap-5 shadow-inner">
+        <button id="rec" class="w-16 h-16 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-2xl transition-all shadow-xl flex items-center justify-center">🎤</button>
+        <button id="play" disabled class="w-12 h-12 rounded-full bg-slate-700 hover:bg-slate-600 text-white disabled:opacity-30 transition-all flex items-center justify-center text-lg">▶</button>
+        <audio id="au" class="hidden"></audio>
+      </div>
+
+      <div>
+        <div class="flex justify-between items-center mb-1.5">
+          <label for="tr" class="text-xs font-bold text-slate-700">📝 내 답변 내용 (음성 인식 후 직접 수정 가능)</label>
+          <button id="stt" class="text-[11px] font-bold bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-3 py-1.5 hover:bg-emerald-100 transition-all shadow-xs flex items-center gap-1"><span>✨</span> AI 음성 받아쓰기</button>
+        </div>
+        <textarea id="tr" rows="4" class="w-full text-sm p-3.5 rounded-2xl border-2 border-emerald-100 focus:outline-emerald-400 bg-white shadow-inner" placeholder="마이크 녹음 후 AI 받아쓰기를 누르거나, 직접 답변 내용을 타이핑해보세요."></textarea>
+      </div>
+
+      <button id="abtn" class="w-full sm:w-auto sm:float-right px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl transition-all shadow-md flex items-center justify-center gap-1.5"></button>
+      <div class="clear-both"></div>
+    </div>
+
+    <div id="fb" class="hidden card p-6 space-y-5 animate-fadeIn">
+      <div id="tabs" class="bg-emerald-50/80 p-1.5 rounded-2xl flex gap-1.5 border border-emerald-100"></div>
+      <div id="fbctx" class="bg-amber-50/50 border border-amber-100 rounded-2xl p-4 text-xs space-y-1.5"></div>
+      <div class="grid grid-cols-2 gap-3 text-center">
+        <div class="bg-emerald-50/70 border border-emerald-200/60 rounded-2xl p-4"><div class="text-xs font-bold text-emerald-800 mb-1">🎯 구체성·진정성</div><div class="text-3xl font-black text-emerald-950"><span id="s1">0</span><span class="text-xs font-normal text-emerald-700"> /100</span></div></div>
+        <div class="bg-teal-50/70 border border-teal-200/60 rounded-2xl p-4"><div class="text-xs font-bold text-teal-800 mb-1">🧠 논리·전달력</div><div class="text-3xl font-black text-teal-950"><span id="s2">0</span><span class="text-xs font-normal text-teal-700"> /100</span></div></div>
+      </div>
+      <div class="p-4 bg-emerald-50/70 border border-emerald-200/60 rounded-2xl text-sm"><b class="text-xs text-emerald-900 flex items-center gap-1.5 mb-1"><span>✅</span> 잘한 점</b><p id="st" class="whitespace-pre-line text-slate-700 leading-relaxed"></p></div>
+      <div class="p-4 bg-amber-50/70 border border-amber-200/60 rounded-2xl text-sm"><b class="text-xs text-amber-900 flex items-center gap-1.5 mb-1"><span>⚠️</span> 보완하면 좋은 점</b><p id="im" class="whitespace-pre-line text-slate-700 leading-relaxed"></p></div>
+      <div class="p-4 bg-gradient-to-br from-[#22332a] to-[#17241d] text-slate-100 rounded-2xl text-sm shadow-md"><b class="text-xs text-emerald-300 flex items-center gap-1.5 mb-1.5"><span>⭐</span> 고3 맞춤 모범 답안</b><p id="ma" class="whitespace-pre-line leading-relaxed text-emerald-50/90"></p></div>
+      <div id="nf" class="hidden p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-sm"><b class="text-xs text-emerald-900 flex items-center gap-1.5 mb-1"><span>🗨️</span> 교수님의 다음 꼬리질문</b><p id="nft" class="font-semibold text-emerald-950 mt-1 leading-relaxed"></p></div>
+    </div>
+  </section>
+</main>
+
+<div id="load" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center backdrop-blur-sm">
+  <div class="card p-7 text-center space-y-3.5 shadow-2xl"><div class="w-10 h-10 mx-auto border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div><p class="text-sm font-bold text-slate-700">면접관 교수님이 답변을 따뜻하게 살펴보는 중이에요… ☕</p></div>
+</div>
+<div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4.5 py-3 rounded-2xl z-50 opacity-0 transition-opacity pointer-events-none shadow-2xl"></div>
+
+<script>
+/* [유형 0=인성·일반, 1=교육시사, 2=생기부], 분류, 질문, 팁 */
+const Q=[
+[0,"지원동기","초등교사가 되고 싶다고 처음 생각한 계기가 무엇인가요?","계기가 된 장면 하나 → 교사의 매력 → 지금까지 한 노력 순서로."],
+[0,"자기소개","1분 동안 자기소개를 해 주세요.","나를 보여 줄 키워드 2개와 그 근거 경험을 말해요."],
+[0,"장점","본인의 장점 두 가지와, 교사가 되었을 때 어떻게 쓰일지 말해 보세요.","장점마다 짧은 경험 사례를 하나씩 붙여요."],
+[0,"단점","본인의 단점은 무엇이고, 어떻게 고치려고 노력했나요?","솔직한 단점 → 노력 → 달라진 점."],
+[0,"교사상","아이들에게 어떤 선생님으로 기억되고 싶나요?","한 문장 결론 + 그렇게 생각한 경험."],
+[0,"교사 자질","교사에게 가장 중요한 자질 한 가지를 고르고 이유를 말해 보세요.","하나만 고르고 내 경험과 연결해요."],
+[0,"좋아하는 과목","가장 좋아하는 과목은 무엇이고, 그 과목을 가르친다면 어떤 수업을 해 보고 싶나요?","토론·놀이·실험 등 수업 활동을 구체적으로."],
+[0,"자신 없는 과목","체육·미술·음악 중 가장 자신 없는 과목은 무엇이고, 어떻게 가르칠 건가요?","솔직하게 인정하고 극복 방법을 말해요."],
+[0,"초능력","초능력을 하나 가질 수 있다면, 교실에서 어떤 능력을 쓰고 싶나요?","엉뚱해도 좋지만 ‘아이들을 위한 이유’를 꼭 붙여요."],
+[0,"친구가 보는 나","친구들은 본인을 어떤 사람이라고 이야기하나요?","친구가 실제로 한 말 + 사례."],
+[0,"감정 관리","힘들거나 속상할 때 마음을 어떻게 다스리나요?","나만의 방법 → 교실에서 아이에게 알려 줄 방법."],
+[0,"진주교대","진주교대에 와서 꼭 해 보고 싶은 활동이 있나요?","학교 프로그램을 찾아본 흔적이 보이게 말해요."],
+[1,"디지털교과서","AI 디지털교과서에 대해 알고 있는 것과 본인의 생각을 말해 보세요.","장점 하나 + 걱정 하나 + 내 입장."],
+[1,"AI와 교사","AI가 발달해도 교사가 꼭 필요한 이유는 무엇일까요?","AI가 못 하는 것(공감, 인성 지도)을 중심으로."],
+[1,"스마트폰","학교에서 스마트폰 사용을 제한하는 것에 찬성하나요, 반대하나요?","입장을 먼저 말하고 이유 두 가지."],
+[1,"사교육","사교육이 늘어나는 이유와, 학교(공교육)가 할 수 있는 일은 무엇일까요?","원인 한 가지 + 학교의 역할."],
+[1,"늘봄학교","늘봄학교에서 ‘돌봄’과 ‘교육’은 어떻게 균형을 잡으면 좋을까요?","돌봄은 안전·정서, 교육은 배움이라는 구분."],
+[1,"숏폼과 문해력","짧은 영상에 익숙한 아이들의 글 읽기 능력을 높이려면 어떻게 하면 좋을까요?","그림책 → 짧은 글 → 긴 글처럼 단계로."],
+[1,"교권","교사의 교육활동이 침해되는 일이 생기는 이유와 해결 방법은 무엇일까요?","원인 한 가지 + 해결책 한 가지."],
+[1,"최근 교육 이슈","최근 관심 있게 본 교육 관련 이슈 하나와 그에 대한 생각을 말해 보세요.","면접 단골 질문입니다. 미리 하나 정리해 두세요."],
+[2,"학급 반장","학급 반장을 하면서 가장 힘들었던 순간과 해결한 방법은 무엇인가요?","갈등 상황 → 내가 한 행동 → 결과."],
+[2,"전교 부회장","전교 부회장으로 체육행사를 준비할 때 친구들 의견을 어떻게 조율했나요?","의견이 달랐던 사례 하나를 구체적으로."],
+[2,"캠페인","학교폭력·금연 캠페인에서 맡은 역할과 배운 점은 무엇인가요?","내 역할 → 아이들 지도에 쓸 점."],
+[2,"동아리 부장","청출어람 동아리 부장으로서 가장 신경 쓴 점은 무엇인가요?","부원들을 참여시킨 방법 중심으로."],
+[2,"교육멘토링","초등학생 교육멘토링에서 가장 기억에 남는 순간은 언제였나요?","아이의 반응 + 내가 느낀 점."],
+[2,"팝콘 수업","팝콘이 튀기는 원리를 초등학생에게 어떻게 쉽게 설명했나요?","그림, 실물 시연 등 눈높이를 맞춘 방법."],
+[2,"화산 멘토링","1학년 화산 멘토링을 다시 설계할 때, 어떤 점을 바꿨고 왜 바꿨나요?","이야기 속 영웅이 되는 방식으로 바꾼 이유."],
+[2,"4차 산업혁명","4차 산업혁명 시대에 교육이 변해야 할 점과 변하지 말아야 할 점은 무엇인가요?","‘교육의 본질’이라는 발표 내용을 떠올려요."],
+[2,"공교육 독서","‘공교육을 뒤엎자’를 읽고 가장 크게 느낀 점은 무엇인가요?","느낀 점 → 내가 교사로서 할 일."],
+[2,"교육의 목적","‘교육은 왜 필요한가?’를 고민했다고 되어 있는데, 본인의 답은 무엇인가요?","내 생각을 한 문장으로 + 근거."],
+[2,"수업일기","수업일기 활동은 어떻게 했고, 어떤 도움이 되었나요?","방법 → 학습 효과 → 교실 적용 아이디어."],
+[2,"수학 지도","수학을 어려워하는 초등학생을 돕는 방법으로 어떤 것을 생각했나요?","왜 어려운지 한 가지 + 방법 두세 가지."],
+[2,"영어 보완","영어가 어려웠을 때 어떻게 보완했나요? 그 경험이 교사가 되면 어떻게 도움이 될까요?","부족했던 점을 솔직하게 → 노력 → 배운 점."],
+[2,"한성사범학교","최초의 교사 양성기관 ‘한성사범학교’를 조사한 이유와 느낀 점은 무엇인가요?","교사가 되려는 마음과 연결해요."],
+[2,"적정기술","페트병 음식물 분리기를 만들 때 팀장으로서 어떤 역할을 했나요?","의견을 모은 방법 + 결과물."],
+[2,"AI 문제 프로그램","‘성취도에 따른 문제 출제 프로그램’을 만든 이유와, 교실에서 어떻게 쓸 수 있을까요?","어려움 → 해결 → 교사로서의 활용."],
+[2,"다문화 교육","다문화 학생 탐구를 바탕으로, 예비교사로서 어떤 노력을 할 수 있을까요?","어려움 한 가지 + 내가 할 수 있는 행동."],
+[2,"Q-보드","Q-보드 활동에서 ‘교육의 목적 훼손’을 주제로 정한 이유와 해결책은 무엇이었나요?","주제 선정 이유 → 탐구 과정 → 해결책."],
+[2,"놀이와 정서","놀이가 아이의 마음을 이해하는 데 도움이 되는 이유는 무엇이라고 생각하나요?","말로 표현 못 하는 감정을 놀이로 드러낸다는 점."],
+[2,"학교폭력 지도","‘군주론’과 ‘목민심서’를 학교폭력 지도에 적용했는데, 처벌과 교화 중 어느 쪽이 더 중요할까요?","입장 + 두 방식의 한계를 함께."],
+[2,"교육관","윤리와 사상에서 정리한 본인의 교육관은 무엇인가요?","한 문장으로 요약 + 이유 경험."],
+[2,"봉사활동","봉사활동을 많이 한 이유와 힘들었던 점, 이겨낸 방법은 무엇인가요?","이유 → 어려움 → 극복(꼬리질문 대비)."],
+[2,"환경교육","전력 낭비·분리배출 문제를 실천 과제로 만든 경험을, 초등학생 환경교육에 어떻게 쓰고 싶나요?","아이들이 직접 해 볼 활동 하나."],
+[2,"안전 교육","성폭력 예방교육에서 아이들에게 꼭 알려 주고 싶은 것은 무엇인가요?","‘싫다고 말해도 괜찮다’는 점을 쉬운 말로."],
+[2,"모의수업","모의수업에서 4학년 ‘우리 지역’ 단원을 고른 이유와 가장 고민한 점은 무엇인가요?","대상·단원 선정 이유 → 어려웠던 점 → 해결."],
+[2,"폐교 활용","폐교를 세대 통합 공간으로 활용하자는 아이디어를 낸 이유는 무엇인가요?","초등학생과 어르신이 만났을 때의 장점과 걱정."],
+[2,"학급당 학생 수","대학 구조조정 토론에서 학급당 학생 수를 줄이자고 했는데, 줄면 교실이 어떻게 달라질까요?","아이 한 명 한 명에게 가는 관심과 피드백."],
+[2,"담임선생님 평가","담임선생님이 ‘책임감 있는 학생’이라고 쓰신 이유는 무엇일까요?","실제 사례."],
+[2,"동화 영양교육","‘알프스의 소녀 하이디’로 식생활 교육을 한 이유는 무엇인가요?","동화가 아이들 흥미를 끄는 점."],
+[0,"마지막 한마디","마지막으로 하고 싶은 말씀이 있나요?","진주교대에 오고 싶은 이유 + 다짐을 30초 안에."]
+];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ls=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}};
+let custom=ls('jj_custom',[]),hist=ls('jj_hist',{}),key=localStorage.getItem('jj_key')||'';
+let bank=[],cur=0,filter=-1,S,rec,chunks=[],blob=null,recording=false,tick,sec=0,recog=null,base='';
+const MODEL='gemini-2.5-flash';
+const newS=()=>({step:1,q:['','',''],a:['','',''],ev:[null,null,null,null]});
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function build(){bank=Q.map((r,i)=>({id:'d'+i,t:r[0],cat:r[1],q:r[2],tip:r[3]})).concat(custom)}
+function toast(m){const t=$('toast');t.textContent=m;t.style.opacity=1;setTimeout(()=>t.style.opacity=0,3000)}
+function save(){localStorage.setItem('jj_hist',JSON.stringify(hist));localStorage.setItem('jj_custom',JSON.stringify(custom))}
+
+function renderList(){
+  document.querySelectorAll('.f').forEach(b=>b.className='f flex-1 py-2 rounded-xl transition-all '+(+b.dataset.f===filter?'bg-emerald-600 text-white font-bold shadow-xs':'bg-emerald-50/70 text-slate-600 hover:bg-emerald-100'));
+  $('list').innerHTML=bank.map((b,i)=>({b,i})).filter(({b})=>filter<0||b.t===filter).map(({b,i})=>
+    `<button data-i="${i}" class="q w-full text-left p-3.5 rounded-xl border text-xs transition-all ${i===cur?'border-emerald-500 bg-emerald-50/90 shadow-xs font-semibold':hist[b.id]?'border-emerald-200 bg-emerald-50/40 text-slate-700':'border-emerald-100/80 bg-white hover:bg-emerald-50/40 text-slate-700'}"><div class="flex justify-between font-bold text-emerald-800"><span>Q${i+1} · ${esc(b.cat)}</span>${hist[b.id]?'<span class="text-emerald-700 font-bold">✔ 완료</span>':''}</div><div class="line-clamp-2 mt-1.5 leading-relaxed">${esc(b.q)}</div></button>`).join('');
+  const d=bank.filter(b=>hist[b.id]).length;
+  $('done').textContent=d;$('total').textContent=bank.length;$('bar').style.width=(d/bank.length*100)+'%';
+}
+function view(){
+  const b=bank[cur],s=S.step;
+  const catNames=['🌱 인성·일반','📘 교육시사','📑 생기부'];
+  $('cat').textContent=s===1?((['💚 ','📘 ','📑 '][b.t]||'')+b.cat):s===2?'🔍 1차 꼬리질문':'🔎 2차 꼬리질문';
+  $('qnum').textContent=`Q${cur+1} / ${bank.length}`;
+  $('qtext').textContent=s<4?S.q[s-1]:'🏆 세 번의 답변을 종합한 리포트를 확인해보세요.';
+  $('tip').textContent=b.tip;
+  $('rtitle').textContent=s<4?['🎙️ 1단계 본질문 답변','🎙️ 2단계 1차 꼬리질문 답변','🎙️ 3단계 2차 꼬리질문 답변'][s-1]:'🎉 면접 완료!';
+  $('abtn').textContent=['답변 평가받고 꼬리질문 받기 🚀','답변 평가받고 2차 꼬리질문 받기 🚀','답변 평가받기 ✨','🏆 종합 리포트 확인하기'][s-1];
+  $('answerBox').querySelectorAll('textarea,#rec,#stt').forEach(e=>e.disabled=s===4);
+  $('steps').innerHTML=['본질문','1차 꼬리','2차 꼬리','종합'].map((n,i)=>`<span class="px-3 py-1.5 rounded-xl whitespace-nowrap text-xs ${i+1===s?'bg-emerald-600 text-white font-bold shadow-xs':'bg-emerald-50 text-slate-400'}">${i+1}. ${n}</span>`).join('›');
+}
+function resetInput(){stopRec();blob=null;$('au').removeAttribute('src');$('play').disabled=true;$('tr').value='';base='';sec=0;$('timer').textContent='00:00'}
+function select(i){
+  cur=i;const h=hist[bank[i].id];
+  S=h?JSON.parse(JSON.stringify(h)):newS();S.q[0]=bank[i].q;
+  resetInput();renderList();view();
+  const t=S.ev[3]?4:S.ev[2]?3:S.ev[1]?2:S.ev[0]?1:0;
+  t?fb(t):$('fb').classList.add('hidden');
+}
+function fb(t){
+  const e=S.ev[t-1];if(!e)return;
+  $('fb').classList.remove('hidden');
+  $('tabs').innerHTML=[1,2,3,4].map(n=>`<button data-t="${n}" ${S.ev[n-1]?'':'disabled'} class="tb flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${n===t?'bg-emerald-600 text-white shadow-xs':S.ev[n-1]?'bg-white border border-emerald-200 text-emerald-800 hover:bg-emerald-50':'bg-emerald-50/50 text-slate-300'}">${n===4?'🏆 종합':n+'단계'}</button>`).join('');
+  $('fbctx').innerHTML=t<4?`<div class="font-bold text-emerald-800">${esc(S.q[t-1])}</div><div class="italic whitespace-pre-line text-slate-600 mt-1">💬 ${esc(S.a[t-1])}</div>`:'<div class="font-bold text-emerald-800">본질문 + 1차·2차 꼬리질문 종합 평가</div>';
+  $('s1').textContent=e.scoreIntent??'-';$('s2').textContent=e.scoreLogic??'-';
+  $('st').textContent=e.strengths||'';$('im').textContent=e.improvements||'';$('ma').textContent=e.modelAnswer||'';
+  const nq=t<3&&e.nextFollowupQuestion;$('nf').classList.toggle('hidden',!nq);$('nft').textContent=nq||'';
+}
+
+/* 녹음 + 음성인식 */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){recog=new SR();recog.lang='ko-KR';recog.continuous=true;recog.interimResults=true;
+  recog.onresult=ev=>{let t='';for(const r of ev.results)t+=r[0].transcript;$('tr').value=(base+' '+t).trim()};
+  recog.onend=()=>{base=$('tr').value.trim();if(recording)try{recog.start()}catch(e){}}}
+async function startRec(){
+  try{
+    const st=await navigator.mediaDevices.getUserMedia({audio:true});
+    rec=new MediaRecorder(st);chunks=[];
+    rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+    rec.onstop=()=>{blob=new Blob(chunks,{type:rec.mimeType});$('au').src=URL.createObjectURL(blob);$('play').disabled=false};
+    rec.start();base=$('tr').value.trim();try{recog&&recog.start()}catch(e){}
+    recording=true;sec=0;
+    tick=setInterval(()=>{sec++;$('timer').textContent=fmt(sec)},1000);
+    $('rec').classList.add('pulse');$('rec').textContent='■';
+  }catch(e){toast('마이크 권한을 허용해 주세요 🎤')}
+}
+function stopRec(){
+  if(!recording)return;recording=false;clearInterval(tick);
+  try{rec.stop();rec.stream.getTracks().forEach(t=>t.stop())}catch(e){}
+  try{recog&&recog.stop()}catch(e){}
+  $('rec').classList.remove('pulse');$('rec').textContent='🎤';
+}
+$('rec').onclick=()=>recording?stopRec():startRec();
+$('play').onclick=()=>{const a=$('au');if(!a.src)return;a.paused?(a.play(),$('play').textContent='❚❚'):(a.pause(),$('play').textContent='▶')};
+$('au').onended=()=>$('play').textContent='▶';
+
+/* Gemini */
+async function gemRaw(body){
+  if(!key){
+    $('keyrow').classList.remove('hidden');
+    toast('상단에서 Gemini API 키를 먼저 입력해 주세요 🔑');
+    $('keyIn').focus();
+    return null;
+  }
+  $('load').classList.remove('hidden');
+  try{
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-goog-api-key':key},
+      body:JSON.stringify(body)
+    });
+    if(!r.ok){
+      const errJson = await r.json().catch(()=>({}));
+      throw new Error(errJson.error?.message || 'HTTP '+r.status);
+    }
+    const d=await r.json();
+    return d.candidates?.[0]?.content?.parts?.[0]?.text||null;
+  }catch(e){
+    toast('AI 요청 실패: '+e.message);
+    return null;
+  }finally{
+    $('load').classList.add('hidden');
+  }
+}
+
+$('stt').onclick=async()=>{
+  if(!blob)return toast('먼저 음성을 녹음해 주세요 🎙️');
+  const b64=await new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(blob)});
+  const t=await gemRaw({contents:[{parts:[{inlineData:{mimeType:(blob.type||'audio/webm').split(';')[0],data:b64}},{text:'이 한국어 음성을 들리는 그대로 받아쓰기한 텍스트만 출력하세요. 다른 말은 쓰지 마세요.'}]}]});
+  if(t)$('tr').value=t.trim();
+};
+
+const sys=s=>`너는 교육대학교 초등교육과 수시 면접관(교수)이다. 지원자는 고3 학생이며 진주교대 개별 심층면접(생기부 내용 및 교직관)을 연습 중이다. 답변은 1분 안팎 기준이며, 결론 먼저 → 근거 경험 한 가지 → 교사로서의 다짐 순서가 잘 지켜졌는지 엄격하고 따뜻하게 평가하라. 
+
+반드시 아래 JSON 형식으로만 응답할 것 (마크다운 백틱 코드블록 없이 순수 JSON 문자열만 출력):
+{
+  "scoreIntent": 0부터 100 사이의 숫자 (생기부·경험의 구체성과 진정성),
+  "scoreLogic": 0부터 100 사이의 숫자 (논리와 전달력),
+  "strengths": "잘한 점 2~3줄",
+  "improvements": "보완할 점 2~3줄",
+  "modelAnswer": "고3 학생이 실제로 말하는 구어체(~라고 생각합니다, ~한 경험이 있습니다) 모범 답안, 60~90초 분량"${s<3?',\n  "nextFollowupQuestion": "방금 답변을 바탕으로 고3 학생이 이어서 답할 수 있는 날카롭지만 구체적인 꼬리질문 1개"':''}
+}`;
+
+$('abtn').onclick=async()=>{
+  const s=S.step,ans=$('tr').value.trim();
+  if(s<4&&!ans)return toast('답변을 말하거나 텍스트로 입력해 주세요 💬');
+  const A=[...S.a];if(s<4)A[s-1]=ans;
+  
+  const userPrompt=[0,1,2].filter(k=>k<Math.min(s,3)).map(k=>`[질문${k+1}] ${S.q[k]}\n[답변${k+1}] ${A[k]}`).join('\n\n')+(s<4?'\n\n위 마지막 답변을 평가해주세요.':'\n\n세 번의 질의응답 전체를 종합 평가해주세요.');
+  
+  const raw=await gemRaw({
+    systemInstruction:{parts:[{text:sys(s)}]},
+    contents:[{parts:[{text:userPrompt}]}],
+    generationConfig:{responseMimeType:'application/json'}
+  });
+  
+  if(!raw)return;
+  let j;
+  try{
+    let cleanText = raw.trim();
+    if(cleanText.startsWith('```json')) cleanText = cleanText.replace(/^```json/, '').replace(/```$/, '').trim();
+    else if(cleanText.startsWith('```')) cleanText = cleanText.replace(/^```/, '').replace(/```$/, '').trim();
+    j=JSON.parse(cleanText);
+  }catch(e){
+    toast('응답 파싱 오류가 발생했습니다. 다시 시도해 주세요 😅');
+    return;
+  }
+  
+  S.a=A;S.ev[s-1]=j;
+  if(s<3)S.q[s]=j.nextFollowupQuestion||'방금 답변에서 가장 인상 깊었던 경험을 더 구체적으로 말해 주세요.';
+  S.step=Math.min(s+1,4);
+  hist[bank[cur].id]=JSON.parse(JSON.stringify(S));save();
+  resetInput();renderList();view();fb(s);
+  $('fb').scrollIntoView({behavior:'smooth'});
+};
+
+/* 이벤트 리스너 */
+$('list').onclick=e=>{const b=e.target.closest('.q');if(b)select(+b.dataset.i)};
+$('tabs').onclick=e=>{const b=e.target.closest('.tb');if(b&&!b.disabled)fb(+b.dataset.t)};
+$('filters').onclick=e=>{const b=e.target.closest('.f');if(b){filter=+b.dataset.f;renderList()}};
+$('prev').onclick=()=>cur>0&&select(cur-1);
+$('next').onclick=()=>cur<bank.length-1&&select(cur+1);
+$('rand').onclick=()=>{const pool=bank.map((b,i)=>i).filter(i=>(filter<0||bank[i].t===filter)&&!hist[bank[i].id]);const p=pool.length?pool:bank.map((b,i)=>i);select(p[Math.floor(Math.random()*p.length)])};
+$('reset').onclick=()=>{delete hist[bank[cur].id];save();select(cur);toast('1단계부터 다시 시작합니다 🔄')};
+$('addQ').onclick=()=>{const q=$('newQ').value.trim();if(!q)return toast('질문 내용을 입력해 주세요 ✏️');custom.push({id:'c'+Date.now(),t:0,cat:'내 질문',q,tip:'결론 먼저 → 경험 한 가지 → 교사로서의 다짐 순서로 답변해보세요.'});save();build();$('newQ').value='';select(bank.length-1);toast('나만의 질문이 추가되었습니다 ✨')};
+$('keyBtn').onclick=()=>{$('keyIn').value=key;$('keyrow').classList.toggle('hidden')};
+$('keySave').onclick=()=>{
+  key=$('keyIn').value.trim();
+  localStorage.setItem('jj_key',key);
+  $('keyrow').classList.add('hidden');
+  toast(key ? 'API 키가 안전하게 저장되었습니다 🔒' : 'API 키가 삭제되었습니다');
+};
+
+// 앱 초기화
+build();
+if(key)$('keyrow').classList.add('hidden');
+else $('keyrow').classList.remove('hidden');
+select(0);
+</script>
+</body>
+</html>
