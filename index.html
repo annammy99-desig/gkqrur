@@ -197,8 +197,8 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ls=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}};
 let custom=ls('jj_custom',[]),hist=ls('jj_hist',{});
-// 사용자 지정 API 키 고정 설정
-let key = 'AQ.Ab8RN6ITG0CwHXS5o4NbTI4gjn0Zz_iGSFdM10F92OLXXlDWwA';
+// 현재 미리보기(Canvas) 환경에서는 키를 비워두면 자동으로 시스템 키가 연동되어 작동합니다.
+let key = '';
 let bank=[],cur=0,filter=-1,S,rec,chunks=[],blob=null,recording=false,tick,sec=0,recog=null,base='';
 const MODEL='gemini-3-flash-preview';
 const newS=()=>({step:1,q:['','',''],a:['','',''],ev:[null,null,null,null]});
