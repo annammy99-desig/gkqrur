@@ -146,8 +146,8 @@ const Q=[
 [0,"인성·일반","나를 한 단어로 표현한다면 무엇이고, 그 이유는 무엇인가요?","나를 잘 보여 줄 핵심 키워드 + 그에 걸맞은 근거 경험."],
 [0,"인성·일반","나의 가장 큰 강점이 잘 드러났던 경험을 하나 이야기해 주세요.","강점 정의 → 구체적 일화 → 교사로서의 활용 방안."],
 [0,"인성·일반","아쉬웠던 나의 모습을 하나 꼽고, 그것을 고치려 노력한 경험을 말해 보세요.","솔직한 반성 → 구체적인 극복 노력 → 성장한 점."],
-[0,"인성·일반","10년 뒤 제자가 나를 떠올린다면, 어떤 선생님이었다고 말해 주면 좋겠나요?","한 문장 결론 + 그렇게 다가가기 위해 실천할 방법."],
-[0,"인성·일반","내가 어려워하는 과목을 아이들에게 가르쳐야 한다면 어떻게 준비하겠나요?","솔직한 태도 + 연구 및 협력하는 자세."],
+[0,"인성·일반","10년 뒤 제자가 나를 떠올린다면, 어떤 선생님이었다고 말해 주면 좋겠나요?","한 문장 결론 → 그렇게 다가가기 위해 실천할 방법."],
+[0,"인성·일반","내가 어려워하는 과목을 아이들에게 가르쳐야 한다면 어떻게 준비하겠나요?","솔직한 태도 → 연구 및 협력하는 자세."],
 [0,"인성·일반","초등학생들과 꼭 해 보고 싶은 수업이 있다면 하나만 소개해 주세요. 어떤 수업이고 왜 하고 싶나요?","토론·놀이·체험 등 아이들의 참여를 이끌어낼 구체적 방법."],
 [0,"인성·일반","고3 생활에서 가장 힘들었던 때와 그것을 이겨낸 방법은 무엇인가요?","힘들었던 상황 → 극복 과정 → 긍정적 변화."],
 [0,"인성·일반","진주교대에서 4년 동안 가장 키우고 싶은 역량은 무엇이고, 이유는 무엇인가요?","진주교대 교육 목표나 특징과 연계하여 설명."],
@@ -185,7 +185,7 @@ const Q=[
 [2,"생기부","성적이 아닌 다른 방법으로 아이의 성장을 알아보려면 어떻게 하면 좋을까요?","과정 중심 평가, 관찰 기록, 포트폴리오 활용."],
 [2,"생기부","짧은 영상에 익숙한 아이를 책으로 이끄는 ‘징검다리식 독서’를 어떻게 하면 되나요?","그림책에서 짧은 글, 그리고 긴 글 읽기로의 부드러운 전환."],
 [2,"생기부","Q-보드 활동에서 ‘교육의 목적 훼손과 해결책’을 주제로 고른 이유와, 활동하며 알게 된 점은 무엇인가요?","문제 의식 → 탐구 과정 → 진정한 배움에 대한 고찰."],
-[2,"생기부","2학년 때 봉사활동을 많이 한 이유와, 하면서 힘들었던 점은 무엇인가요?","봉사의 보람 + 한계 극복 경험."],
+[2,"생기부","2학년 때 봉사활동을 많이 한 이유와, 하면서 힘들었던 점은 무엇인가요?","봉사의 보람 → 한계 극복 경험."],
 [2,"생기부","‘군주론’과 ‘목민심서’를 비교하며 학교폭력 지도를 분석했는데, 어느 쪽이 더 중요하다고 보나요?","엄정한 규범(군주론)과 사랑·돌봄(목민심서)의 조화."],
 [2,"생기부","담임선생님이 ‘책임감 있는 학생’이라고 쓰신 이유는 무엇일까요?","학급 속 구체적인 실천 사례 (학급 도우미, 청소 등)."],
 [2,"생기부","어르신과 초등학생이 함께하는 프로그램을 만든다면 어떤 활동을 하고 싶나요?","세대 간 소통과 공감대를 형성할 수 있는 전통 놀이 및 이야기 나눔."],
@@ -196,9 +196,11 @@ const Q=[
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ls=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}};
-let custom=ls('jj_custom',[]),hist=ls('jj_hist',{}),key=localStorage.getItem('jj_key')||'';
+let custom=ls('jj_custom',[]),hist=ls('jj_hist',{});
+// 사용자 지정 API 키 고정 설정
+let key = 'AQ.Ab8RN6ITG0CwHXS5o4NbTI4gjn0Zz_iGSFdM10F92OLXXlDWwA';
 let bank=[],cur=0,filter=-1,S,rec,chunks=[],blob=null,recording=false,tick,sec=0,recog=null,base='';
-const MODEL='gemini-2.5-flash';
+const MODEL='gemini-1.5-pro';
 const newS=()=>({step:1,q:['','',''],a:['','',''],ev:[null,null,null,null]});
 const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 function build(){bank=Q.map((r,i)=>({id:'d'+i,t:r[0],cat:r[1],q:r[2],tip:r[3]})).concat(custom)}
@@ -214,7 +216,6 @@ function renderList(){
 }
 function view(){
   const b=bank[cur],s=S.step;
-  const catNames=['🌱 인성·일반','📘 교육시사','📑 생기부'];
   $('cat').textContent=s===1?((['💚 ','📘 ','📑 '][b.t]||'')+b.cat):s===2?'🔍 1차 꼬리질문':'🔎 2차 꼬리질문';
   $('qnum').textContent=`Q${cur+1} / ${bank.length}`;
   $('qtext').textContent=s<4?S.q[s-1]:'🏆 세 번의 답변을 종합한 리포트를 확인해보세요.';
@@ -271,12 +272,6 @@ $('au').onended=()=>$('play').textContent='▶';
 
 /* Gemini */
 async function gemRaw(body){
-  if(!key){
-    $('keyrow').classList.remove('hidden');
-    toast('상단에서 Gemini API 키를 먼저 입력해 주세요 🔑');
-    $('keyIn').focus();
-    return null;
-  }
   $('load').classList.remove('hidden');
   try{
     const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,{
@@ -358,18 +353,11 @@ $('next').onclick=()=>cur<bank.length-1&&select(cur+1);
 $('rand').onclick=()=>{const pool=bank.map((b,i)=>i).filter(i=>(filter<0||bank[i].t===filter)&&!hist[bank[i].id]);const p=pool.length?pool:bank.map((b,i)=>i);select(p[Math.floor(Math.random()*p.length)])};
 $('reset').onclick=()=>{delete hist[bank[cur].id];save();select(cur);toast('1단계부터 다시 시작합니다 🔄')};
 $('addQ').onclick=()=>{const q=$('newQ').value.trim();if(!q)return toast('질문 내용을 입력해 주세요 ✏️');custom.push({id:'c'+Date.now(),t:0,cat:'내 질문',q,tip:'결론 먼저 → 경험 한 가지 → 교사로서의 다짐 순서로 답변해보세요.'});save();build();$('newQ').value='';select(bank.length-1);toast('나만의 질문이 추가되었습니다 ✨')};
-$('keyBtn').onclick=()=>{$('keyIn').value=key;$('keyrow').classList.toggle('hidden')};
-$('keySave').onclick=()=>{
-  key=$('keyIn').value.trim();
-  localStorage.setItem('jj_key',key);
-  $('keyrow').classList.add('hidden');
-  toast(key ? 'API 키가 안전하게 저장되었습니다 🔒' : 'API 키가 삭제되었습니다');
-};
+$('keyBtn').onclick=()=>{$('keyrow').classList.toggle('hidden')};
 
-// 앱 초기화
+// 앱 초기화 (상단 API 입력바 숨김 처리)
 build();
-if(key)$('keyrow').classList.add('hidden');
-else $('keyrow').classList.remove('hidden');
+$('keyrow').classList.add('hidden');
 select(0);
 </script>
 </body>
