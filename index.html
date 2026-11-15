@@ -196,11 +196,14 @@ const Q=[
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ls=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}};
-let custom=ls('jj_custom',[]),hist=ls('jj_hist',{});
-// 현재 미리보기(Canvas) 환경에서는 키를 비워두면 자동으로 시스템 키가 연동되어 작동합니다.
-let key = '';
+let hist=ls('jj_hist',{}),custom=ls('jj_custom',[]);
+
+// 🔥 사용자님 전용 API 키 완전 고정 (AQ... 형태 정상 맞습니다!)
+const key = 'AQ.Ab8RN6LitkjPb443PkuOREwB18OTCyk5R7laAKcqq1lZs7se_w';
+
 let bank=[],cur=0,filter=-1,S,rec,chunks=[],blob=null,recording=false,tick,sec=0,recog=null,base='';
-const MODEL='gemini-3-flash-preview';
+// 가장 훌륭한 꼬리질문과 평가를 위한 Pro 모델 적용
+const MODEL='gemini-1.5-pro-latest';
 const newS=()=>({step:1,q:['','',''],a:['','',''],ev:[null,null,null,null]});
 const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 function build(){bank=Q.map((r,i)=>({id:'d'+i,t:r[0],cat:r[1],q:r[2],tip:r[3]})).concat(custom)}
@@ -353,11 +356,11 @@ $('next').onclick=()=>cur<bank.length-1&&select(cur+1);
 $('rand').onclick=()=>{const pool=bank.map((b,i)=>i).filter(i=>(filter<0||bank[i].t===filter)&&!hist[bank[i].id]);const p=pool.length?pool:bank.map((b,i)=>i);select(p[Math.floor(Math.random()*p.length)])};
 $('reset').onclick=()=>{delete hist[bank[cur].id];save();select(cur);toast('1단계부터 다시 시작합니다 🔄')};
 $('addQ').onclick=()=>{const q=$('newQ').value.trim();if(!q)return toast('질문 내용을 입력해 주세요 ✏️');custom.push({id:'c'+Date.now(),t:0,cat:'내 질문',q,tip:'결론 먼저 → 경험 한 가지 → 교사로서의 다짐 순서로 답변해보세요.'});save();build();$('newQ').value='';select(bank.length-1);toast('나만의 질문이 추가되었습니다 ✨')};
-$('keyBtn').onclick=()=>{$('keyrow').classList.toggle('hidden')};
 
-// 앱 초기화 (상단 API 입력바 숨김 처리)
+// 앱 초기화 (나만 쓰는 앱이므로 상단 API 입력 버튼과 창을 아예 숨김 처리)
 build();
-$('keyrow').classList.add('hidden');
+if($('keyrow')) $('keyrow').style.display = 'none';
+if($('keyBtn')) $('keyBtn').style.display = 'none';
 select(0);
 </script>
 </body>
