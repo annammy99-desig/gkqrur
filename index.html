@@ -200,7 +200,7 @@ let custom=ls('jj_custom',[]),hist=ls('jj_hist',{});
 // 사용자 지정 API 키 고정 설정
 let key = 'AQ.Ab8RN6ITG0CwHXS5o4NbTI4gjn0Zz_iGSFdM10F92OLXXlDWwA';
 let bank=[],cur=0,filter=-1,S,rec,chunks=[],blob=null,recording=false,tick,sec=0,recog=null,base='';
-const MODEL='gemini-1.5-pro';
+const MODEL='gemini-3-flash-preview';
 const newS=()=>({step:1,q:['','',''],a:['','',''],ev:[null,null,null,null]});
 const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 function build(){bank=Q.map((r,i)=>({id:'d'+i,t:r[0],cat:r[1],q:r[2],tip:r[3]})).concat(custom)}
